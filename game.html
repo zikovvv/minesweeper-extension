@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Minesweeper</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="controls">
+        <label>W:<input type="number" id="width" value="20" min="5" max="30"></label>
+        <label>H:<input type="number" id="height" value="20" min="5" max="30"></label>
+        <label>M:<input type="number" id="mines" value="40" min="1"></label>
+        <button id="restart">
+            <svg viewBox="0 0 24 24" class="restart-icon">
+                <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+            </svg>
+        </button>
+        <div class="timer">Time: <span id="time">0</span></div>
+        <div class="cps">CPS: <span id="cps">0.0</span></div>
+    </div>
+    <div id="game-board" class="game-board"></div>
+    <script src="game.js"></script>
+</body>
+</html>
