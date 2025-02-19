@@ -5,11 +5,19 @@
     --neon-red: #f66;
     --neon-green: #6f6;
     --bg-dark: #1a1a1a;
-    --cell-bg: #2a2a2a;
-    --cell-revealed: #333;
-    --cell-hover: #3a3a3a;
+    --cell-bg: #151515;
+    --cell-revealed: #454545;
+    --cell-hover: #252525;
     --flag-color: #ffd700;
     --reveal-glow: #4a4a4a;
+    --number-1: #5db2ff;
+    --number-2: #66ff66;
+    --number-3: #ff6666;
+    --number-4: #c266ff;
+    --number-5: #ffb366;
+    --number-6: #66ffe6;
+    --number-7: #ff66e6;
+    --number-8: #ffffff;
 }
 
 body {
@@ -51,7 +59,7 @@ body {
     width: var(--cell-size);
     height: var(--cell-size);
     background-color: var(--cell-bg);
-    border: 1px solid #444;
+    border: 1px solid #3a3a3a;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -59,18 +67,33 @@ body {
     user-select: none;
     font-size: 14px;
     position: relative;
+    box-shadow: inset 2px 2px 4px rgba(0,0,0,0.3), inset -2px -2px 4px rgba(255,255,255,0.05);
 }
 
 .cell:hover {
     background-color: var(--cell-hover);
+    box-shadow: inset 0 0 4px var(--neon-blue);
 }
 
 .cell.revealed {
     background-color: var(--cell-revealed);
+    border-color: #4a4a4a;
+    box-shadow: none;
+    border: 1px solid #555;
 }
 
 .cell.revealed:not([data-value]) {
     animation: revealGlow 0.25s ease-out;
+}
+
+.cell.revealed:not([data-value]):not(.mine) {
+    background: linear-gradient(45deg, #454545 25%, #505050 25%, #505050 50%, #454545 50%, #454545 75%, #505050 75%);
+    background-size: 6px 6px;
+}
+
+.cell.revealed[data-value] {
+    background-color: #404040;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
 }
 
 .cell.flagged {
@@ -123,14 +146,24 @@ body {
     filter: drop-shadow(0 0 2px var(--neon-red));
 }
 
-.cell[data-value="1"] { color: #4d9fff; text-shadow: 0 0 4px #4d9fff; }
-.cell[data-value="2"] { color: #4dff4d; text-shadow: 0 0 4px #4dff4d; }
-.cell[data-value="3"] { color: #ff4d4d; text-shadow: 0 0 4px #ff4d4d; }
-.cell[data-value="4"] { color: #9f4dff; text-shadow: 0 0 4px #9f4dff; }
-.cell[data-value="5"] { color: #ff9f4d; text-shadow: 0 0 4px #ff9f4d; }
-.cell[data-value="6"] { color: #4dffd2; text-shadow: 0 0 4px #4dffd2; }
-.cell[data-value="7"] { color: #ff4dd2; text-shadow: 0 0 4px #ff4dd2; }
-.cell[data-value="8"] { color: #ffffff; text-shadow: 0 0 4px #ffffff; }
+.cell[data-value="1"] { color: var(--number-1); text-shadow: 0 0 4px var(--number-1); }
+.cell[data-value="2"] { color: var(--number-2); text-shadow: 0 0 4px var(--number-2); }
+.cell[data-value="3"] { color: var(--number-3); text-shadow: 0 0 4px var(--number-3); }
+.cell[data-value="4"] { color: var(--number-4); text-shadow: 0 0 4px var(--number-4); }
+.cell[data-value="5"] { color: var(--number-5); text-shadow: 0 0 4px var(--number-5); }
+.cell[data-value="6"] { color: var(--number-6); text-shadow: 0 0 4px var(--number-6); }
+.cell[data-value="7"] { color: var(--number-7); text-shadow: 0 0 4px var(--number-7); }
+.cell[data-value="8"] { color: var(--number-8); text-shadow: 0 0 4px var(--number-8); }
+
+.cell[data-value] {
+    font-weight: bold;
+    text-shadow: 0 0 6px currentColor;
+}
+
+.cell:not(.revealed) {
+    background-image: linear-gradient(135deg, transparent 0%, transparent 49%, rgba(255,255,255,0.05) 50%, transparent 51%, transparent 100%);
+    background-size: 4px 4px;
+}
 
 button {
     padding: 2px 8px;
@@ -221,4 +254,23 @@ label {
         transform: scale(1) rotate(0deg); 
         filter: brightness(1);
     }
+}
+
+@keyframes wave-reveal {
+    0% {
+        transform: scale(0.7);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.wave-reveal {
+    animation: wave-reveal 0.3s ease-out;
 }

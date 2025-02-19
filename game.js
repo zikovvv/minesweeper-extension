@@ -232,7 +232,7 @@ class Minesweeper {
             if (this.mineLocations.has(key)) {
                 this.gameOver = true;
                 cell.classList.add('mine');
-                this.revealAllMines();
+                this.revealAllMines(currentX, currentY); // Pass the coordinates of the clicked mine
                 this.stopTimer();
                 this.timeElement.parentElement.classList.add('lose');
                 return;
@@ -260,15 +260,58 @@ class Minesweeper {
         this.checkWin();
     }
 
-    revealAllMines() {
-        let delay = 0;
-        this.mineLocations.forEach(key => {
-            const [x, y] = key.split(',').map(Number);
-            const cell = this.getCellElement(x, y);
+    getDistance(x1, y1, x2, y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
+
+    revealAllMines(centerX, centerY) {
+        // Get all cells with their distances
+        const allCells = [];
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                allCells.push({
+                    x,
+                    y,
+                    isMine: this.mineLocations.has(`${x},${y}`),
+                    distance: this.getDistance(centerX, centerY, x, y)
+                });
+            }
+        }
+
+        // Sort cells by distance from center
+        allCells.sort((a, b) => a.distance - b.distance);
+
+        // Group cells by similar distances to create wave effect
+        const waveSize = 0.5; // Smaller wave size for more distinct circles
+        let waves = {};
+
+        allCells.forEach(cell => {
+            let waveIndex = Math.floor(cell.distance / waveSize);
+            if (!waves[waveIndex]) waves[waveIndex] = [];
+            waves[waveIndex].push(cell);
+        });
+
+        // Reveal cells in waves
+        Object.keys(waves).sort((a, b) => Number(a) - Number(b)).forEach((waveIndex, i) => {
             setTimeout(() => {
-                cell.classList.add('revealed', 'mine');
-            }, delay);
-            delay += 50; // Stagger the mine reveals
+                waves[waveIndex].forEach(cell => {
+                    const element = this.getCellElement(cell.x, cell.y);
+                    // Add a temporary animation class
+                    element.classList.add('wave-reveal');
+                    element.classList.add('revealed');
+                    if (cell.isMine) {
+                        element.classList.add('mine');
+                    } else {
+                        const value = this.board[cell.y][cell.x];
+                        if (value > 0) {
+                            element.textContent = value;
+                            element.dataset.value = value;
+                        }
+                    }
+                    // Remove animation class after effect
+                    setTimeout(() => element.classList.remove('wave-reveal'), 300);
+                });
+            }, i * 10); // Even faster animation (10ms between waves)
         });
     }
 
