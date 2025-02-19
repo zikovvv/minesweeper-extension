@@ -47,12 +47,16 @@ body {
 
 .game-board {
     display: grid;
-    gap: 1px;
+    gap: 0;  /* Remove gap between cells */
     background-color: #222;
-    padding: 2px;
+    padding: 1px;
     border-radius: 4px;
     margin: 2px 0 0 0;
     box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    user-select: none;  /* Prevent selection */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .cell {

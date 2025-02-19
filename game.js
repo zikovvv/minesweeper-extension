@@ -19,6 +19,10 @@ class Minesweeper {
         this.revealedLastSecond = 0;
         this.cpsUpdateInterval = null;
         
+        // Prevent context menu on the game board and document
+        this.boardElement.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        
         // Event listeners
         document.getElementById('restart').addEventListener('click', () => this.initGame());
         this.initGame();
@@ -193,23 +197,15 @@ class Minesweeper {
                     if (this.flagged.has(key)) {
                         flagCount++;
                     }
-                    if (!this.revealed.has(key) && !this.flagged.has(key)) {
+                    if (!this.revealed.has(key)) {
                         surroundingCells.push([newX, newY]);
                     }
                 }
             }
         }
 
-        // If flags match the number, reveal all non-flagged surrounding cells
+        // If flags match the number, reveal all surrounding cells
         if (flagCount === number) {
-            for (const [cellX, cellY] of surroundingCells) {
-                if (this.mineLocations.has(`${cellX},${cellY}`)) {
-                    // If we hit an unflagged mine, it should explode
-                    this.reveal(cellX, cellY);
-                    return; // Game will end due to mine explosion
-                }
-            }
-            // If we didn't hit any mines, reveal all surrounding cells
             for (const [cellX, cellY] of surroundingCells) {
                 this.reveal(cellX, cellY);
             }
@@ -224,6 +220,13 @@ class Minesweeper {
             const key = `${currentX},${currentY}`;
             
             if (this.revealed.has(key)) continue;
+            
+            // Remove flag if the cell was flagged
+            if (this.flagged.has(key)) {
+                this.flagged.delete(key);
+                const cell = this.getCellElement(currentX, currentY);
+                cell.classList.remove('flagged');
+            }
             
             this.revealed.add(key);
             const cell = this.getCellElement(currentX, currentY);
