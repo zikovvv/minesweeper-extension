@@ -1,5 +1,17 @@
 class Minesweeper {
     constructor() {
+        // Fixed cell size
+        this.CELL_SIZE = 28;
+        
+        // DOM elements
+        this.boardElement = document.getElementById('game-board');
+        this.timeElement = document.getElementById('time');
+        this.widthInput = document.getElementById('width');
+        this.heightInput = document.getElementById('height');
+        this.minesInput = document.getElementById('mines');
+        this.cpsElement = document.getElementById('cps');
+
+        // Initialize game state
         this.board = [];
         this.mineLocations = new Set();
         this.revealed = new Set();
@@ -9,31 +21,49 @@ class Minesweeper {
         this.timer = null;
         this.timeElapsed = 0;
         
-        // DOM elements
-        this.boardElement = document.getElementById('game-board');
-        this.timeElement = document.getElementById('time');
-        this.widthInput = document.getElementById('width');
-        this.heightInput = document.getElementById('height');
-        this.minesInput = document.getElementById('mines');
-        this.cpsElement = document.getElementById('cps');
-        this.revealedLastSecond = 0;
-        this.cpsUpdateInterval = null;
-        
-        // Prevent context menu on the game board and document
-        this.boardElement.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('contextmenu', e => e.preventDefault());
+        // Set initial board size immediately
+        this.width = 20;  // Default width
+        this.height = 20; // Default height
+        this.setGridSize();
         
         // Event listeners
-        document.getElementById('restart').addEventListener('click', () => this.initGame());
+        this.boardElement.addEventListener('contextmenu', e => e.preventDefault());
+        document.getElementById('restart').addEventListener('click', () => {
+            this.initGame();
+        });
+
+        // Initialize game
         this.initGame();
+    }
+
+    setGridSize() {
+        // Set explicit grid dimensions
+        this.boardElement.style.width = `${this.CELL_SIZE * this.width}px`;
+        this.boardElement.style.height = `${this.CELL_SIZE * this.height}px`;
+        this.boardElement.style.gridTemplateColumns = `repeat(${this.width}, ${this.CELL_SIZE}px)`;
+        this.boardElement.style.gridTemplateRows = `repeat(${this.height}, ${this.CELL_SIZE}px)`;
+        
+        // Update window size
+        const width = this.width * this.CELL_SIZE + 6;
+        const height = this.height * this.CELL_SIZE + document.querySelector('.controls').offsetHeight + 8;
+        
+        chrome.runtime.sendMessage({
+            action: 'resizeWindow',
+            width: width,
+            height: height + 28
+        });
     }
 
     initGame() {
         this.width = parseInt(this.widthInput.value);
         this.height = parseInt(this.heightInput.value);
         this.totalMines = Math.min(parseInt(this.minesInput.value), 
-            Math.floor(this.width * this.height * 0.85)); // Max 85% of cells can be mines
+            Math.floor(this.width * this.height * 0.85));
         
+        // Set grid size before other initialization
+        this.setGridSize();
+        
+        // Reset game state
         this.minesInput.value = this.totalMines;
         this.board = [];
         this.mineLocations.clear();
@@ -52,7 +82,6 @@ class Minesweeper {
     }
 
     createBoard() {
-        this.boardElement.style.gridTemplateColumns = `repeat(${this.width}, var(--cell-size))`;
         this.boardElement.innerHTML = '';
         
         for (let y = 0; y < this.height; y++) {
@@ -182,7 +211,7 @@ class Minesweeper {
 
         // Count flags around the cell
         let flagCount = 0;
-        const surroundingCells = [];
+        const surroundingUnflaggedCells = [];
         
         for (let dy = -1; dy <= 1; dy++) {
             for (let dx = -1; dx <= 1; dx++) {
@@ -196,17 +225,17 @@ class Minesweeper {
                     const key = `${newX},${newY}`;
                     if (this.flagged.has(key)) {
                         flagCount++;
-                    }
-                    if (!this.revealed.has(key)) {
-                        surroundingCells.push([newX, newY]);
+                    } else if (!this.revealed.has(key)) {
+                        surroundingUnflaggedCells.push([newX, newY]);
                     }
                 }
             }
         }
 
-        // If flags match the number, reveal all surrounding cells
+        // Only reveal cells if the number of flags matches the number
         if (flagCount === number) {
-            for (const [cellX, cellY] of surroundingCells) {
+            // Reveal all unflagged and unrevealed surrounding cells
+            for (const [cellX, cellY] of surroundingUnflaggedCells) {
                 this.reveal(cellX, cellY);
             }
         }
@@ -340,6 +369,20 @@ class Minesweeper {
             }
         }
     }
+
+    updateWindowSize() {
+        const width = this.width * this.CELL_SIZE + 6; // Add small border padding
+        const height = this.height * this.CELL_SIZE + document.querySelector('.controls').offsetHeight + 8;
+        
+        chrome.runtime.sendMessage({
+            action: 'resizeWindow',
+            width: width,
+            height: height + 28 // Add Chrome title bar height
+        });
+    }
 }
 
-new Minesweeper();
+// Wait for DOM to be loaded before creating game instance
+document.addEventListener('DOMContentLoaded', () => {
+    const game = new Minesweeper();
+});

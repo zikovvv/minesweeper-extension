@@ -20,43 +20,63 @@
     --number-8: #ffffff;
 }
 
-body {
-    font-family: 'Arial', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    background-color: var(--bg-dark);
-    margin: 2px;
+html, body {
+    margin: 0;
     padding: 0;
+    background: var(--bg-dark);
     color: #fff;
     overflow: hidden;
 }
 
+.game-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: block;
+    padding: 2px;
+}
+
 .controls {
-    margin: 2px 2px 2px 0;
-    padding: 4px;
-    background-color: #2a2a2a;
-    border-radius: 4px;
-    box-shadow: 0 0 10px rgba(0,255,255,0.1);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
+    display: block;
+    padding: 2px;
+    background: #2a2a2a;
     border: 1px solid #333;
+    margin-bottom: 2px;
+    white-space: nowrap;
 }
 
 .game-board {
     display: grid;
-    gap: 0;  /* Remove gap between cells */
-    background-color: #222;
+    background: #222;
     padding: 1px;
+    border: 1px solid #333;
     border-radius: 4px;
-    margin: 2px 0 0 0;
     box-shadow: 0 0 15px rgba(0,0,0,0.5);
     user-select: none;  /* Prevent selection */
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    scrollbar-width: thin;
+    scrollbar-color: #444 #222;
+    /* Force initial grid size */
+    width: 560px;  /* 20 cells * 28px */
+    height: 560px; /* 20 cells * 28px */
+    grid-template-columns: repeat(20, 28px);
+    grid-template-rows: repeat(20, 28px);
+}
+
+.game-board::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.game-board::-webkit-scrollbar-track {
+    background: #222;
+}
+
+.game-board::-webkit-scrollbar-thumb {
+    background-color: #444;
+    border-radius: 4px;
 }
 
 .cell {
@@ -277,4 +297,15 @@ label {
 
 .wave-reveal {
     animation: wave-reveal 0.3s ease-out;
+}
+
+/* Remove any responsive/adaptive styles */
+@media (max-width: 600px) {
+    .controls {
+        flex-wrap: nowrap;
+    }
+    
+    body {
+        padding: 0;
+    }
 }

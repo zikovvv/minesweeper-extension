@@ -1,11 +1,27 @@
+let activeWindowId = null;
+
 chrome.action.onClicked.addListener(() => {
-  // Window size calculation:
-  // Width: 20 cells * 28px + 6px total margin/padding = 566px
-  // Height: 28px controls + 20 cells * 28px + 8px total margin/padding = 596px
-  chrome.windows.create({
-    url: 'game.html',
-    type: 'popup',
-    width: 566,
-    height: 596
-  });
+    chrome.windows.create({
+        url: 'game.html',
+        type: 'popup',
+        width: 400,
+        height: 450,
+        state: 'normal'
+    });
+});
+
+chrome.windows.onRemoved.addListener((windowId) => {
+    if (windowId === activeWindowId) {
+        activeWindowId = null;
+    }
+});
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'resizeWindow' && sender.tab) {
+        chrome.windows.update(sender.tab.windowId, {
+            width: request.width,
+            height: request.height,
+            state: 'normal'  // Ensure window isn't maximized
+        });
+    }
 });
