@@ -21,9 +21,10 @@ class Minesweeper {
         this.timer = null;
         this.timeElapsed = 0;
         
+        // Load settings from local storage or use defaults
+        this.loadSettingsFromLocalStorage();
+        
         // Set initial board size immediately
-        this.width = 20;  // Default width
-        this.height = 20; // Default height
         this.setGridSize();
         
         // Event listeners
@@ -34,6 +35,46 @@ class Minesweeper {
 
         // Initialize game
         this.initGame();
+    }
+
+    // Load settings from local storage
+    loadSettingsFromLocalStorage() {
+        try {
+            const savedSettings = localStorage.getItem('minesweeperSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                this.width = settings.width || 20;
+                this.height = settings.height || 20;
+                
+                // Update input fields with saved values
+                this.widthInput.value = this.width;
+                this.heightInput.value = this.height;
+                this.minesInput.value = settings.mines || 40;
+            } else {
+                // Default values if no saved settings
+                this.width = 20;
+                this.height = 20;
+            }
+        } catch (error) {
+            console.error('Error loading settings from local storage:', error);
+            // Use defaults if there's an error
+            this.width = 20;
+            this.height = 20;
+        }
+    }
+    
+    // Save settings to local storage
+    saveSettingsToLocalStorage() {
+        try {
+            const settings = {
+                width: this.width,
+                height: this.height,
+                mines: this.totalMines
+            };
+            localStorage.setItem('minesweeperSettings', JSON.stringify(settings));
+        } catch (error) {
+            console.error('Error saving settings to local storage:', error);
+        }
     }
 
     setGridSize() {
@@ -59,6 +100,9 @@ class Minesweeper {
         this.height = parseInt(this.heightInput.value);
         this.totalMines = Math.min(parseInt(this.minesInput.value), 
             Math.floor(this.width * this.height * 0.85));
+        
+        // Save settings to local storage when game is restarted
+        this.saveSettingsToLocalStorage();
         
         // Set grid size before other initialization
         this.setGridSize();
